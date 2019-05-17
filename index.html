@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Google Map API</title>
+  <style>
+    #map { height: 100%; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+  <script>
+    var marker;
+
+    var myStyle = [
+      {
+        featureType: "all",
+        elementType: "all",
+        stylers: [
+          { invert_lightness: true }
+        ]
+      }, {
+        featureType: "road",
+        elementType: "labels",
+        stylers: [
+          { visibility: "off" }
+        ]
+      }
+    ];
+
+    var options = {
+      mapTypeControlOptions: {
+        mapTypeIds: ['mystyle']
+      },
+      center: { lat: 59.325, lng: 18.070 },
+      zoom: 13,
+      disableDefaultUI: true,
+      mapTypeId: 'mystyle'
+    };
+
+    function initMap() {
+      var map = new google.maps.Map(document.getElementById('map'), options);
+      marker = new google.maps.Marker({
+        map: map,
+        draggable: true,
+        animation: google.maps.Animation.DROP,
+        position: { lat: 59.327, lng: 18.067 }
+      });
+      marker.addListener('click', toggleBounce);
+      map.mapTypes.set('mystyle', new google.maps.StyledMapType(myStyle, { name: 'My Style' }));
+    }
+
+    function toggleBounce() {
+      if (marker.getAnimation() !== null) {
+        marker.setAnimation(null);
+      } else {
+        marker.setAnimation(google.maps.Animation.BOUNCE);
+      }
+    }
+  </script>
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAUbRHtu3k_fg3jDGk_qAatE5jA4bC_ndE&callback=initMap">
+    </script>
+</body>
+
+</html>
