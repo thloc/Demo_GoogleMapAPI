@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Google Map API</title>
+  <style>
+    #map { height: 100%; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+  <script>
+    var marker;
+
+    var myStyle = [
+      { elementType: 'geometry', stylers: [{ color: '#ebe3cd' }] },
+      { elementType: 'labels.text.fill', stylers: [{ color: '#523735' }] },
+      { elementType: 'labels.text.stroke', stylers: [{ color: '#f5f1e6' }] },
+      {
+        featureType: 'administrative',
+        elementType: 'geometry.stroke',
+        stylers: [{ color: '#c9b2a6' }]
+      },
+      {
+        featureType: 'administrative.land_parcel',
+        elementType: 'geometry.stroke',
+        stylers: [{ color: '#dcd2be' }]
+      },
+      {
+        featureType: 'administrative.land_parcel',
+        elementType: 'labels.text.fill',
+        stylers: [{ color: '#ae9e90' }]
+      },
+      {
+        featureType: 'landscape.natural',
+        elementType: 'geometry',
+        stylers: [{ color: '#dfd2ae' }]
+      },
+      {
+        featureType: 'poi',
+        elementType: 'geometry',
+        stylers: [{ color: '#dfd2ae' }]
+      },
+      {
+        featureType: 'poi',
+        elementType: 'labels.text',
+        stylers: [{ visibility: "off" }]
+      },
+      {
+        featureType: 'poi',
+        elementType: 'labels.text.fill',
+        stylers: [{ color: '#93817c' }]
+      },
+      {
+        featureType: 'poi.park',
+        elementType: 'geometry.fill',
+        stylers: [{ color: '#a5b076' }]
+      },
+      {
+        featureType: 'poi.park',
+        elementType: 'labels.text.fill',
+        stylers: [{ color: '#447530' }]
+      },
+      {
+        featureType: 'road',
+        elementType: 'geometry',
+        stylers: [{ color: '#f5f1e6' }]
+      },
+      {
+        featureType: 'road.arterial',
+        elementType: 'geometry',
+        stylers: [{ color: '#fdfcf8' }]
+      },
+      {
+        featureType: 'road.highway',
+        elementType: 'geometry',
+        stylers: [{ color: '#f8c967' }]
+      },
+      {
+        featureType: 'road.highway',
+        elementType: 'geometry.stroke',
+        stylers: [{ color: '#e9bc62' }]
+      },
+      {
+        featureType: 'road.highway.controlled_access',
+        elementType: 'geometry',
+        stylers: [{ color: '#e98d58' }]
+      },
+      {
+        featureType: 'road.highway.controlled_access',
+        elementType: 'geometry.stroke',
+        stylers: [{ color: '#db8555' }]
+      },
+      {
+        featureType: 'road.local',
+        elementType: 'labels.text.fill',
+        stylers: [{ color: '#806b63' }]
+      },
+      {
+        featureType: 'transit.line',
+        elementType: 'geometry',
+        stylers: [{ color: '#dfd2ae' }]
+      },
+      {
+        featureType: 'transit.line',
+        elementType: 'labels.text.fill',
+        stylers: [{ color: '#8f7d77' }]
+      },
+      {
+        featureType: 'transit.line',
+        elementType: 'labels.text.stroke',
+        stylers: [{ color: '#ebe3cd' }]
+      },
+      {
+        featureType: 'transit.station',
+        elementType: 'geometry',
+        stylers: [{ color: '#dfd2ae' }]
+      },
+      {
+        featureType: 'water',
+        elementType: 'geometry.fill',
+        stylers: [{ color: '#b9d3c2' }]
+      },
+      {
+        featureType: 'water',
+        elementType: 'labels.text.fill',
+        stylers: [{ color: '#92998d' }]
+      }];
+
+    var address = "Le Hong Phong High School for the Gifted";
+
+    var options = {
+      mapTypeControlOptions: {
+        mapTypeIds: ['mystyle']
+      },
+      zoom: 13,
+      disableDefaultUI: true,
+      mapTypeId: 'mystyle'
+    };
+
+    function initMap() {
+      var geocoder = new google.maps.Geocoder();
+      var pyrmont = new google.maps.LatLngBounds();
+      var map = new google.maps.Map(document.getElementById('map'), options);
+      var service = new google.maps.places.PlacesService(map);
+      var bounds = new google.maps.LatLngBounds();
+
+      var contentString = '<div id="content">'+
+          '<div id="siteNotice"></div>'+
+          '<div id="bodyContent">'+
+            '<div style="width:100%;">'+
+              '<p><b>Le Hong Phong High School for the Gifted</b><br/>' +
+              '235 Đường Nguyễn Văn Cừ, Phường 4, Quận 5, Hồ Chí Minh, Vietnam'+
+              '<p><a href="https://www.google.com/maps/dir//Hotel+Nikko+Saigon,+Ph%C6%B0%E1%BB%9Dng+Nguy%E1%BB%85n+C%C6%B0+Trinh,+Qu%E1%BA%ADn+1,+H%E1%BB%93+Ch%C3%AD+Minh,+Vietnam/@10.764278,106.6807877,17z/data=!4m8!4m7!1m0!1m5!1m1!1s0x31752f1938e5eee5:0xd76d74bb9d93b165!2m2!1d106.682971!2d10.7642727">'+
+              'View on Google Maps</a> '+
+              '</p>'+
+            '</div>'+
+          '</div>'+
+        '</div>';
+
+      if (geocoder) {
+          geocoder.geocode({
+            'address': address,
+            'region': "VN"
+          }, function(results, status) {
+            if (status == google.maps.GeocoderStatus.OK) {
+              map.setCenter(results[0].geometry.location);
+
+              pyrmont = results[0].geometry.location;
+              service.nearbySearch(
+                { location: pyrmont, radius: 500, type: ['poi'] },
+                function(results, status, pagination) {
+                  if (status !== 'OK') return;
+
+                  for (var i = 0, place; place = results[i]; i++) {
+                    console.log(place.name);
+                    console.log((google.maps.geometry.spherical.computeDistanceBetween(results[0].geometry.location, place.geometry.location) / 1000).toFixed(2) + " km's");
+                  }
+
+                  pagination.nextPage();
+                }
+              );
+
+              var infowindow = new google.maps.InfoWindow({
+                  content: contentString,
+                  size: new google.maps.Size(70, 50)
+              });
+
+              marker = new google.maps.Marker({
+                title: address,
+                position: results[0].geometry.location,
+                map: map,
+              });
+
+              google.maps.event.addListener(marker, 'click', function() {
+                infowindow.open(map, marker);
+              });
+
+              infowindow.open(map, marker);
+            }
+          });
+        }
+      map.mapTypes.set('mystyle', new google.maps.StyledMapType(myStyle, { name: 'My Style' }));
+    }
+
+    function toggleBounce() {
+      if (marker.getAnimation() !== null) {
+        marker.setAnimation(null);
+      } else {
+        marker.setAnimation(google.maps.Animation.BOUNCE);
+      }
+    }
+  </script>
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key={{KEY}}&callback=initMap&libraries=places,geometry">
+    </script>
+</body>
+
+</html>
